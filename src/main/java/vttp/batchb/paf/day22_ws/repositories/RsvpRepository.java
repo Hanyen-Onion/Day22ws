@@ -17,6 +17,32 @@ public class RsvpRepository {
     @Autowired
     private JdbcTemplate template;
 
+    public Integer numOfRsvps() {
+
+        Integer count = template.queryForObject(SQL_COUNT_RSVPS, Integer.class);
+
+        if (count != null) 
+            return count;
+        
+        return null;
+    }
+
+    public Boolean updateRsvpByEmail(Rsvp rsvp, String email) {
+        int rsvpInserted = template.update(SQL_UPDATE_RSVP, 
+            rsvp.getName(), 
+            rsvp.getEmail(), 
+            rsvp.getPhone(), 
+            rsvp.getConfirmationDate(), 
+            rsvp.getComments(),
+            email
+        );
+
+        if (rsvpInserted > 0)
+            return true;
+
+        return false;
+    }
+
     public Boolean insertRsvp(Rsvp rsvp) {
 
         int rsvpInserted = template.update(SQL_ADD_OR_UPDATE_RSVP, 
@@ -37,7 +63,7 @@ public class RsvpRepository {
         
         List<Rsvp> rsvps = new LinkedList<>();
 
-        SqlRowSet rs = template.queryForRowSet(SQL_GET_RSVP_BY_NAME, name);
+        SqlRowSet rs = template.queryForRowSet(SQL_GET_RSVP_BY_NAME, "%%%s%%".formatted(name));
 
         while (rs.next()) {
             Rsvp rsvp = new Rsvp();
@@ -46,7 +72,13 @@ public class RsvpRepository {
             rsvp.setEmail(rs.getString("email"));
             rsvp.setPhone(rs.getString("phone"));
             rsvp.setConfirmationDate(rs.getDate("confirmation_date"));
-            rsvp.setComments(rs.getString("text"));
+
+            if (rs.getString("comments")== null) 
+                rsvp.setComments("null");
+            else 
+                rsvp.setComments(rs.getString("comments"));
+
+            rsvps.add(rsvp);
         }
 
         return rsvps;
@@ -59,14 +91,17 @@ public class RsvpRepository {
         SqlRowSet rs = template.queryForRowSet(SQL_GET_RSVP_LIST);
 
         while (rs.next()) {
-            Rsvp rsvp = new Rsvp(
-                rs.getInt("id"),
-                rs.getString("name"),
-                rs.getString("email"),
-                rs.getString("phone"),
-                rs.getDate("confirmation_date"),
-                rs.getString("text")
-            );
+            Rsvp rsvp = new Rsvp();
+            rsvp.setId(rs.getInt("id"));
+            rsvp.setName(rs.getString("name"));
+            rsvp.setEmail(rs.getString("email"));
+            rsvp.setPhone(rs.getString("phone"));
+            rsvp.setConfirmationDate(rs.getDate("confirmation_date"));
+
+            if (rs.getString("comments")== null) 
+                rsvp.setComments("null");
+            else 
+                rsvp.setComments(rs.getString("comments"));
 
             rsvps.add(rsvp);
         }

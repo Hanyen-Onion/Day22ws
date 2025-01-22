@@ -14,8 +14,16 @@ public class RsvpService {
     @Autowired
     private RsvpRepository rsvpRepo;
 
-    public Boolean addRsvo(Rsvp rsvp) {
+    public int countRsvps() {
+        int count = rsvpRepo.numOfRsvps();
+        return count;
+    }
 
+    public Boolean updateRsvpByEmail(Rsvp rsvp, String email) {
+        return rsvpRepo.updateRsvpByEmail(rsvp, email);
+    }
+
+    public Boolean addRsvp(Rsvp rsvp) {
         return rsvpRepo.insertRsvp(rsvp);
     }
 
